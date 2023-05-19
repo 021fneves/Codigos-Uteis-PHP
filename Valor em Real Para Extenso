@@ -1,0 +1,100 @@
+/**
+	 * Valor por extenso em reais
+	 *
+	 * @param float $numero
+	 * @return string Valor em reais por extenso
+	 * @access public
+	 * @link http://forum.imasters.uol.com.br/index.php?showtopic=125375
+	 */
+	public function numeroPorExtenso($numero) {
+		$singular = array('', '', 'mil', 'milhão', 'bilhão', 'trilhão', 'quatrilhão');
+		$plural = array('', '', 'mil', 'milhões', 'bilhões', 'trilhões', 'quatrilhões');
+	
+		$c = array('', 'cem', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos');
+		$d = array('', 'dez', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa');
+		$d10 = array('dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezesete', 'dezoito', 'dezenove');
+		$u = array('', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove');
+	
+		$z = 0;
+		$rt = '';
+	
+		$valor = number_format($numero, 2, '.', '.');
+		$inteiro = explode('.', $valor);
+		$tamInteiro = count($inteiro);
+	
+		// Normalizandos os valores para ficarem com 3 digitos
+		$inteiro[0] = sprintf('%03d', $inteiro[0]);
+		$inteiro[$tamInteiro - 1] = sprintf('%03d', $inteiro[$tamInteiro - 1]);
+	
+		$fim = $tamInteiro - 1;
+		if ($inteiro[$tamInteiro - 1] <= 0) {
+			$fim--;
+		}
+		foreach ($inteiro as $i => $valor) {
+			$rc = $c[$valor{0}];
+			if ($valor > 100 && $valor < 200) {
+				$rc = 'cento';
+			}
+			$rd = '';
+			if ($valor{1} > 1) {
+				$rd = $d[$valor{1}];
+			}
+			$ru = '';
+			if ($valor > 0) {
+				if ($valor{1} == 1) {
+					$ru = $d10[$valor{2}];
+				} else {
+					$ru = $u[$valor{2}];
+				}
+			}
+	
+			$r = $rc;
+			if ($rc && ($rd || $ru)) {
+				$r .= ' e ';
+			}
+			$r .= $rd;
+			if ($rd && $ru) {
+				$r .= ' e ';
+			}
+			$r .= $ru;
+			$t = $tamInteiro - 1 - $i;
+			if (!empty($r)) {
+				$r .= ' ';
+				if ($valor > 1) {
+					$r .= $plural[$t];
+				} else {
+					$r .= $singular[$t];
+				}
+			}
+			if ($valor == '000') {
+				$z++;
+			} elseif ($z > 0) {
+				$z--;
+			}
+			if ($t == 1 && $z > 0 && $inteiro[0] > 0) {
+				if ($z > 1) {
+					$r .= ' de ';
+				}
+				$r .= $plural[$t];
+			}
+			if (!empty($r)) {
+				if ($i > 0 && $i < $fim  && $inteiro[0] > 0 && $z < 1) {
+					if ($i < $fim) {
+						$rt .= ', ';
+					} else {
+						$rt .= ' e ';
+					}
+				} elseif ($t == 0 && $inteiro[0] > 0) {
+					$rt .= ' e ';
+				} else {
+					$rt .= ' ';
+				}
+				$rt .= $r;
+			}
+		}
+	
+		if (empty($rt)) {
+			return 'zero';
+		}
+		return trim(str_replace('  ', ' ', $rt));
+	}
